@@ -36,3 +36,40 @@ O logo está em: assets/logo.png
 
 Exemplo de nomes:
 "materials": {"a":"Molas","b":"Canos","c":"Gatilhos","d":"Pratas","e":"Bronzes"}
+
+
+✅ NOVO: Modo “somente materiais”
+- Ative em Config: “Modo somente materiais (sem valor)”.
+- Esconde a coluna Valor (k) e o card de Valor total.
+- A nota fica sem valor (apenas itens + totais de materiais).
+
+
+=== UPGRADES INCLUÍDOS ===
+1) Busca por item (campo Buscar)
+2) Filtro por categoria (dropdown)
+3) Botões +/- nas quantidades
+4) Link compartilhável do orçamento (Copiar link)
+   - o link salva as quantidades na URL, ex.: ?item_01=2&item_05=1
+5) Combos/Presets (dropdown Combos + botão Aplicar)
+   - edite no catalog.json em "presets"
+6) Histórico local (Salvar + Histórico)
+   - salva no navegador (localStorage), até 50 entradas
+
+=== NOTA DETALHADA ===
+- A nota agora mostra valor unitário por item, parcial por linha e subtotal.
+
+
+✅ RENOMEAR ITENS E CATEGORIAS (sem mexer na lista inteira)
+Agora você pode renomear em um só lugar no catalog.json:
+
+"item_names": {
+  "item_01": "Nome do Item 01",
+  "item_02": "Nome do Item 02"
+},
+"category_names": {
+  "Classe 1": "Fuzilaria",
+  "Classe 2": "SMG"
+}
+
+- As chaves (item_01, Classe 1, etc.) são as originais.
+- O site usa esses mapas para exibir nomes/categorias e também para busca/filtro/nota.

@@ -287,3 +287,375 @@ pre{
     justify-content:flex-end;
   }
 }
+
+
+/* === MAIS DESTAQUE AO LOGO (Topo só com logo + ações à direita) === */
+.topbar{
+  padding: 18px 20px;
+}
+
+.logo{
+  width: 92px;
+  height: 92px;
+  padding: 10px;
+  border-radius: 18px;
+  object-fit: contain;
+
+  background: rgba(0,0,0,.40);
+  border: 1px solid rgba(255,255,255,.14);
+
+  box-shadow:
+    0 18px 55px rgba(0,0,0,.60),
+    0 0 0 6px rgba(225,29,46,.10),
+    0 0 36px rgba(225,29,46,.22);
+}
+
+/* Ajuste visual da marca (esquerda) */
+.brand{ min-width: unset; }
+
+/* Chip mais “badge” */
+.actions .modechip{
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+/* Mobile */
+@media (max-width: 520px){
+  .topbar{ padding: 14px 14px; }
+  .logo{ width: 74px; height: 74px; padding: 9px; border-radius: 16px; }
+}
+
+
+/* === CONTROLES (Busca/Filtro/Combos/Link/Histórico) === */
+.controls{
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  padding: 12px 16px 14px;
+  border-bottom:1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,.02), transparent);
+}
+.control{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  min-width: 160px;
+}
+.control-grow{ flex: 1 1 260px; min-width: 220px; }
+.control-actions{
+  flex-direction:row;
+  align-items:flex-end;
+  gap:10px;
+  min-width: unset;
+}
+.ctl-label{
+  font-size: 12px;
+  color: var(--muted);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.ctl-input{
+  height: 40px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  color: var(--text);
+  outline:none;
+}
+.ctl-input:focus{
+  border-color: rgba(225,29,46,.55);
+  box-shadow: 0 0 0 4px rgba(225,29,46,.15);
+}
+
+/* === QTD com botões +/- === */
+.qtybox{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.qbtn{
+  width:34px;
+  height:34px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  font-weight:800;
+  cursor:pointer;
+}
+.qbtn:hover{ background: rgba(255,255,255,.10); }
+.qbtn:active{ transform: translateY(1px); }
+.qty{
+  width: 64px;
+  text-align:center;
+}
+
+/* === HISTÓRICO === */
+.history-actions{ display:flex; justify-content:flex-end; }
+.history-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.history-item{
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.20);
+  border-radius: var(--radius2);
+  padding: 12px;
+}
+.history-item .h-top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:flex-start;
+}
+.history-item .h-title{
+  font-weight:700;
+  font-family: var(--fontTitle);
+  letter-spacing:.3px;
+}
+.history-item .h-meta{
+  font-size:12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.history-item .h-actions{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+}
+.btn-sm{
+  padding:8px 10px;
+  border-radius:12px;
+  font-size: 13px;
+}
+
+@media (max-width: 720px){
+  .control{ min-width: 140px; }
+  .control-actions{ width:100%; justify-content:flex-end; }
+}
+
+
+/* === CHIP CLICÁVEL: alterna modos (Calculadora / Valores / Materiais) === */
+.actions .modechip{
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+}
+.actions .modechip::after{
+  content: "↻";
+  font-size: 12px;
+  opacity: .75;
+  margin-left: 8px;
+}
+.actions .modechip:hover{
+  border-color: rgba(255,255,255,.22);
+  background: rgba(255,255,255,.10);
+}
+.actions .modechip:active{
+  transform: translateY(1px);
+}
+
+/* Estilos por modo */
+.actions .modechip.is-normal{
+  border-color: rgba(255,255,255,.12);
+}
+.actions .modechip.is-value{
+  border-color: rgba(225,29,46,.55);
+  box-shadow: 0 0 0 4px rgba(225,29,46,.15);
+}
+.actions .modechip.is-materials{
+  border-color: rgba(56,189,248,.45);
+  box-shadow: 0 0 0 4px rgba(56,189,248,.14);
+}
+
+
+/* === MODE MENU (clique direito no chip) === */
+.actions{ position: relative; }
+
+.modemenu{
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 190px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.72);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 55px rgba(0,0,0,.55);
+  display: none;
+  z-index: 50;
+}
+.modemenu.is-open{ display: block; }
+
+.menuitem{
+  width: 100%;
+  text-align: left;
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 0;
+  background: transparent;
+  color: rgba(255,255,255,.92);
+  cursor: pointer;
+  font-family: var(--fontBody);
+  font-weight: 600;
+}
+.menuitem:hover{
+  background: rgba(255,255,255,.10);
+}
+.menuitem:active{
+  transform: translateY(1px);
+}
+.menuitem.is-active{
+  background: rgba(225,29,46,.16);
+  outline: 1px solid rgba(225,29,46,.30);
+}
+
+
+/* ================= ESTÉTICA (Agressivo + Minimal + Luxury) ================= */
+
+/* ULTRA DISCRETA TEXTURA NO FUNDO */
+.bg::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events:none;
+  opacity: .045;
+  mix-blend-mode: overlay;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+/* Fundo premium com “halo” vermelho e vinheta */
+.bg{
+  background:
+    radial-gradient(900px 520px at 18% 4%, rgba(225,29,46,.16), transparent 55%),
+    radial-gradient(820px 520px at 80% 16%, rgba(255,255,255,.05), transparent 60%),
+    radial-gradient(1200px 900px at 50% 110%, rgba(0,0,0,.75), rgba(0,0,0,1) 62%);
+  filter: saturate(1.05);
+}
+.bg::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events:none;
+  background: radial-gradient(1200px 800px at 50% 0%, transparent 35%, rgba(0,0,0,.65) 85%);
+}
+
+/* Logo + nome da fac: mais destaque (luxury) */
+.brand{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.brand .logo{
+  width: 118px;
+  height: 118px;
+  padding: 14px;
+  border-radius: 24px;
+  background:
+    linear-gradient(145deg, rgba(20,20,24,.92), rgba(10,10,12,.92));
+  border: 1px solid rgba(255,255,255,.09);
+  box-shadow:
+    0 28px 70px rgba(0,0,0,.78),
+    0 0 0 8px rgba(225,29,46,.14),
+    0 0 72px rgba(225,29,46,.42);
+  transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+}
+.brand .logo:hover{
+  transform: translateY(-2px) scale(1.03);
+  filter: contrast(1.05);
+  box-shadow:
+    0 34px 86px rgba(0,0,0,.85),
+    0 0 0 10px rgba(225,29,46,.20),
+    0 0 92px rgba(225,29,46,.55);
+}
+
+.facname{
+  font-family: var(--fontTitle);
+  font-weight: 800;
+  letter-spacing: 4px;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.90);
+  text-shadow: 0 10px 30px rgba(0,0,0,.65);
+}
+.facname .accent{
+  color: rgba(225,29,46,.95);
+}
+
+/* Topbar mais “premium” */
+.topbar{
+  padding: 18px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  background: linear-gradient(180deg, rgba(255,255,255,.03), transparent);
+  backdrop-filter: blur(10px);
+}
+
+/* Cartões + tabela com contraste mais “luxury” */
+.card{
+  background: linear-gradient(180deg, rgba(16,16,20,.92), rgba(10,10,14,.92));
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: 0 26px 80px rgba(0,0,0,.62);
+}
+
+/* Micro animações suaves */
+.btn, button, .qbtn, .modechip, .menuitem{
+  transition: transform .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.btn:hover, button:hover{ transform: translateY(-1px); }
+.btn:active, button:active{ transform: translateY(1px); }
+
+/* Destaque quando QTD > 0 */
+tr.has-qty{
+  background: linear-gradient(90deg, rgba(225,29,46,.14), rgba(225,29,46,.03));
+  outline: 1px solid rgba(225,29,46,.18);
+  outline-offset: -1px;
+}
+tr.has-qty td.item{
+  font-weight: 700;
+}
+
+/* Switch mini (somente selecionados) */
+.switch.mini{
+  transform: scale(.92);
+  transform-origin: right center;
+  margin-right: 10px;
+}
+.switch.mini .switch-label{ font-size: 12px; opacity: .85; }
+
+/* Modal actions: permitir spacer */
+.modal-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.modal-actions .spacer{ flex: 1 1 auto; }
+
+/* Tabela: header um pouco mais marcante */
+thead th{
+  background: rgba(255,255,255,.05);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+/* Animação “glow” discreta no chip conforme modo */
+@keyframes softPulse{
+  0%{ box-shadow: 0 0 0 0 rgba(225,29,46,.0); }
+  50%{ box-shadow: 0 0 0 6px rgba(225,29,46,.14); }
+  100%{ box-shadow: 0 0 0 0 rgba(225,29,46,.0); }
+}
+.actions .modechip.is-value{ animation: softPulse 2.6s ease-in-out infinite; }
+.actions .modechip.is-materials{ animation: softPulse 2.6s ease-in-out infinite; }
+
+/* Mobile */
+@media (max-width: 520px){
+  .brand .logo{ width: 92px; height: 92px; padding: 12px; border-radius: 20px; }
+  .facname{ font-size: 12px; letter-spacing: 3px; }
+}

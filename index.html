@@ -15,12 +15,17 @@
   <header class="topbar">
     <div class="brand">
       <img class="logo" src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
-      
+      <div class="facname">TROPA <span class="accent">DA</span> LB</div>
     </div>
     </div>
 
     <div class="actions">
       <div class="modechip" id="modeChip">Calculadora</div>
+      <div class="modemenu" id="modeMenu" aria-hidden="true" role="menu">
+        <button class="menuitem" type="button" data-mode="normal" role="menuitem">🧮 Calculadora</button>
+        <button class="menuitem" type="button" data-mode="value" role="menuitem">💰 Valores</button>
+        <button class="menuitem" type="button" data-mode="materials" role="menuitem">🧾 Materiais</button>
+      </div>
       <button class="btn btn-ghost" id="btnReset" title="Zerar quantidades">Zerar</button>
       <button class="btn btn-primary" id="btnReceipt">Gerar nota</button>
     </div>
@@ -31,6 +36,31 @@
       <div class="card-head">
         <h2>Tabela de craft (RP)</h2>
         <p class="muted">Os itens e “receitas” são carregados do arquivo <code>catalog.json</code>. Você pode renomear itens/categorias e valores lá.</p>
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <span class="ctl-label">Buscar</span>
+          <input id="searchInput" class="ctl-input" placeholder="Digite para filtrar..." />
+        </div>
+
+        <div class="control">
+          <span class="ctl-label">Categoria</span>
+          <select id="categorySelect" class="ctl-input">
+            <option value="">Todas</option>
+          </select>
+        </div>
+<div class="control control-actions">
+          <label class="switch mini">
+            <input type="checkbox" id="toggleOnlySelected">
+            <span class="slider"></span>
+            <span class="switch-label">Somente selecionados</span>
+          </label>
+
+<button class="btn btn-ghost" id="btnCopyLink" title="Copiar link com o orçamento">Copiar link</button>
+          <button class="btn btn-ghost" id="btnSaveHistory" title="Salvar este orçamento no histórico">Salvar</button>
+          <button class="btn btn-ghost" id="btnOpenHistory" title="Ver histórico">Histórico</button>
+        </div>
       </div>
 
       <div class="table-wrap">
@@ -141,7 +171,35 @@
         <div class="modal-actions">
           <button class="btn btn-primary" id="btnCopyReceipt">Copiar nota</button>
           <button class="btn btn-ghost" id="btnPrint">Imprimir</button>
+          <div class="spacer"></div>
+          <button class="btn btn-ghost" id="btnExportPDF" title="Abre impressão para salvar como PDF">Exportar PDF</button>
+          <button class="btn btn-ghost" id="btnExportPNG">PNG</button>
+          <button class="btn btn-ghost" id="btnExportJPG">JPG</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal" id="historyModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="historyTitle">Histórico</div>
+          <div class="muted">Orçamentos salvos neste navegador.</div>
+        </div>
+        <button class="btn btn-ghost" data-close="1">Fechar</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="history-actions">
+          <button class="btn btn-ghost" id="btnClearHistory">Limpar histórico</button>
+        </div>
+
+        <div class="history-list" id="historyList"></div>
+
+        <div class="muted" id="historyEmpty" style="display:none;">Nenhum orçamento salvo ainda.</div>
       </div>
     </div>
   </div>
