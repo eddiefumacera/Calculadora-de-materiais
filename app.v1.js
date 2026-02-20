@@ -583,16 +583,17 @@ function exportReceiptJPG(){
   const pad = 52;
   const headerH = 150;
   const lineH = 30;
+
+  // Limita linhas para evitar imagem gigantesca
+  const maxLines = 120;
+  const safeLines = lines.slice(0, maxLines);
+
   // largura proporcional ao texto (com limites para não ficar gigante)
   const measureCanvas = document.createElement("canvas");
   const mctx = measureCanvas.getContext("2d");
   mctx.font = "16px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
   const maxLinePx = safeLines.reduce((mx, l) => Math.max(mx, mctx.measureText(l).width), 0);
   const W = Math.max(820, Math.min(980, Math.ceil(maxLinePx + pad*2)));
-
-  // Limita linhas para evitar imagem gigantesca (ainda dá pra copiar texto completo no botão Copiar nota)
-  const maxLines = 120;
-  const safeLines = lines.slice(0, maxLines);
 
   const H = headerH + pad + safeLines.length * lineH + pad;
 

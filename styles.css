@@ -470,11 +470,26 @@ body::after{
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: .11;
+  opacity: .04;
   background-image: url("assets/logo.png");
   background-repeat: no-repeat;
   background-position: center 140px;
   background-size: 620px;
   filter: contrast(165%) brightness(125%) saturate(120%);
+  mix-blend-mode: overlay;
+}
+
+/* ===== MARCA D'ÁGUA (mais confiável que body::after) ===== */
+.bg-watermark{
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("assets/logo.png");
+  background-repeat: no-repeat;
+  background-position: center 140px;
+  background-size: 620px;
+  opacity: 0.11;
+  filter: contrast(170%) brightness(125%) saturate(125%);
   mix-blend-mode: overlay;
 }
