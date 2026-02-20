@@ -566,13 +566,15 @@ function buildReceiptLinesPlain(){
   return lines;
 }
 
-function downloadDataUrl(dataUrl, filename){
+function downloadBlobUrl(blob, filename){
+  const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = dataUrl;
+  a.href = url;
   a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
 function exportReceiptJPG(){
@@ -734,8 +736,10 @@ function exportReceiptJPG(){
     });
 
     // Export
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-    downloadDataUrl(dataUrl, "orcamento_tropa_da_lb.jpg");
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      downloadBlobUrl(blob, "orcamento_tropa_da_lb.jpg");
+    }, "image/jpeg", 0.92);
   };
 
   logo.onload = () => {

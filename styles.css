@@ -97,12 +97,14 @@ body::before{
   position:absolute;
   left:50%;
   top:50%;
-  transform: translate(-50%,-50%) translateY(10px); /* transpassa para baixo */
+  transform: translate(-50%,-50%) translateY(4px); /* transpassa para baixo */
   z-index:3;
   filter: drop-shadow(0 24px 50px rgba(0,0,0,.75)) drop-shadow(0 0 30px rgba(225,29,46,.30));
 }
 
 .facname{
+  margin-top: 10px;
+
   font-weight:800;
   letter-spacing:4px;
   text-transform:uppercase;
@@ -468,11 +470,11 @@ body::after{
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: .07;
+  opacity: .11;
   background-image: url("assets/logo.png");
   background-repeat: no-repeat;
   background-position: center 140px;
   background-size: 620px;
-  filter: grayscale(100%) contrast(140%) brightness(120%);
-  mix-blend-mode: soft-light;
+  filter: contrast(165%) brightness(125%) saturate(120%);
+  mix-blend-mode: overlay;
 }
