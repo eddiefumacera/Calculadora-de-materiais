@@ -523,6 +523,33 @@ async function copyText(text){
 function openModal(){ els.modal.setAttribute("aria-hidden","false"); renderReceipt(); }
 function closeModal(){ els.modal.setAttribute("aria-hidden","true"); }
 
+
+async function fetchCatalog(){
+  // Tenta caminhos possíveis (GitHub Pages em subpasta, cache, etc.)
+  const basePath = location.pathname.endsWith("/") ? location.pathname : location.pathname + "/";
+  const repoPath = "/" + basePath.split("/").filter(Boolean)[0] + "/"; // primeira pasta (repo)
+  const candidates = [
+    "./catalog.json",
+    "catalog.json",
+    basePath + "catalog.json",
+    repoPath + "catalog.json",
+    "/catalog.json",
+  ];
+
+  let lastErr = null;
+  for (const url of candidates){
+    try{
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) { lastErr = new Error(`HTTP ${res.status} em ${url}`); continue; }
+      const data = await res.json();
+      return { data, url };
+    }catch(e){
+      lastErr = e;
+    }
+  }
+  throw lastErr || new Error("Falha ao carregar catalog.json");
+}
+
 async function init(){
   const res = await fetch("catalog.json", { cache:"no-store" });
   const catalog = await res.json();
@@ -812,5 +839,11 @@ async function init(){
 
 init().catch(err => {
   console.error(err);
-  alert("Erro ao carregar catalog.json. Hospede o site (GitHub Pages/Netlify) para o fetch funcionar.");
+  alert("Erro ao carregar catalog.json.
+
+1) Confirme que catalog.json está na RAIZ do repositório (mesmo nível do index.html).
+2) Confira se o link do site corresponde ao repositório publicado.
+   Ex.: se o repo é teste-321, o site deve ser /teste-321/
+
+Se quiser, abra o DevTools (F12) > Console para ver o detalhe do erro.");
 });
