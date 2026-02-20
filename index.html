@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Calculadora RP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <img class="logo" src="assets/logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div class="brand-text">
+        <div class="title">Calculadora RP</div>
+        <div class="subtitle">Preencha quantidades • veja totais • gere nota</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-ghost" id="btnReset" title="Zerar quantidades">Zerar</button>
+      <button class="btn btn-primary" id="btnReceipt">Gerar nota</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="card-head">
+        <h2>Tabela de craft (RP)</h2>
+        <p class="muted">Os itens e “receitas” são carregados do arquivo <code>catalog.json</code>. Você pode renomear itens/categorias e valores lá.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table class="table" id="itemsTable">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th class="col-cat">Categoria</th>
+              <th class="col-qty">Qtd</th>
+              <th class="col-num"><span data-label="a">Material A</span></th>
+              <th class="col-num"><span data-label="b">Material B</span></th>
+              <th class="col-num"><span data-label="c">Material C</span></th>
+              <th class="col-num"><span data-label="d">Material D</span></th>
+              <th class="col-num"><span data-label="e">Material E</span></th>
+              <th class="col-num">Valor (k)</th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="grid">
+      <section class="card">
+        <div class="card-head">
+          <h2>Totais</h2>
+          <p class="muted">Somatório automático conforme as quantidades.</p>
+        </div>
+
+        <div class="totals" id="totals">
+          <div class="total"><div class="label" data-label="a">Material A</div><div class="value" data-k="a">0</div></div>
+          <div class="total"><div class="label" data-label="b">Material B</div><div class="value" data-k="b">0</div></div>
+          <div class="total"><div class="label" data-label="c">Material C</div><div class="value" data-k="c">0</div></div>
+          <div class="total"><div class="label" data-label="d">Material D</div><div class="value" data-k="d">0</div></div>
+          <div class="total"><div class="label" data-label="e">Material E</div><div class="value" data-k="e">0</div></div>
+          <div class="total total-accent"><div class="label">Valor total</div><div class="value" data-k="valor">0k</div></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="small-actions">
+          <button class="btn btn-ghost" id="btnCopyTotals">Copiar totais</button>
+          <span class="hint" id="copyHint"></span>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Config (rápido)</h2>
+          <p class="muted">Ajuste a visualização: esconder colunas e ativar “somente valor”.</p>
+        </div>
+
+        <div class="config">
+          <label class="switch">
+            <input type="checkbox" id="toggleMaterials" checked>
+            <span class="slider"></span>
+            <span class="switch-label">Mostrar materiais</span>
+          </label>
+
+          <label class="switch">
+            <input type="checkbox" id="toggleCategory" checked>
+            <span class="slider"></span>
+            <span class="switch-label">Mostrar categoria</span>
+          </label>
+
+          <label class="switch">
+            <input type="checkbox" id="toggleOnlyValue">
+            <span class="slider"></span>
+            <span class="switch-label">Modo “somente valor” (nota rápida)</span>
+          </label>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div class="modal" id="receiptModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close="1"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="receiptTitle">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title" id="receiptTitle">Nota</div>
+          <div class="muted">Copie e envie no Discord.</div>
+        </div>
+        <button class="btn btn-ghost" data-close="1">Fechar</button>
+      </div>
+
+      <div class="modal-body">
+        <label class="field">
+          <span>Cliente (opcional)</span>
+          <input id="clientName" placeholder="Nome / ID do cliente" />
+        </label>
+
+        <label class="field">
+          <span>Observação (opcional)</span>
+          <input id="clientNote" placeholder="Ex.: entrega em 10 min" />
+        </label>
+
+        <div class="receipt-preview">
+          <pre id="receiptText"></pre>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-primary" id="btnCopyReceipt">Copiar nota</button>
+          <button class="btn btn-ghost" id="btnPrint">Imprimir</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
