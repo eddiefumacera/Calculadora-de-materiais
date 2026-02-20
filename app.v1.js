@@ -593,7 +593,7 @@ function exportReceiptJPG(){
   const mctx = measureCanvas.getContext("2d");
   mctx.font = "16px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
   const maxLinePx = safeLines.reduce((mx, l) => Math.max(mx, mctx.measureText(l).width), 0);
-  const W = Math.max(820, Math.min(980, Math.ceil(maxLinePx + pad*2)));
+  const W = Math.max(760, Math.min(920, Math.ceil(maxLinePx + pad*2)));
 
   const H = headerH + pad + safeLines.length * lineH + pad;
 
@@ -706,7 +706,9 @@ function exportReceiptJPG(){
 
     ctx.fillStyle = "rgba(255,255,255,0.92)";
     ctx.font = "900 22px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-    const totalStr = `${Math.round(totals.valor)}k`;
+    const totalK = Math.round(totals.valor);
+    const totalMoney = totalK * 1000;
+    const totalStr = `$${formatMoneyBR(totalMoney)}`;
     ctx.fillText(totalStr, boxX + 14, boxY + 54);
 
     ctx.fillStyle = "rgba(255,255,255,0.50)";
@@ -726,7 +728,7 @@ function exportReceiptJPG(){
 
     // Body text (mono)
     ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "16px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    ctx.font = "16px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
 
     // Draw lines with safe clipping
     const maxW = cardX + cardW - pad;
@@ -766,7 +768,7 @@ function exportReceiptJPG(){
         ctx.strokeStyle = "rgba(255,255,255,0.10)";
         ctx.stroke();
 
-        ctx.drawImage(img, badgeX+13, badgeY+13, s, s);
+        drawImageContain(ctx, img, badgeX+13, badgeY+13, s, s);
 
         // Watermark
         const wmSize = 620;
@@ -775,7 +777,7 @@ function exportReceiptJPG(){
         ctx.save();
         ctx.globalAlpha = 0.10;
         ctx.filter = "contrast(170%) brightness(125%) saturate(120%)";
-        ctx.drawImage(img, wmX, wmY, wmSize, wmSize);
+        drawImageContain(ctx, img, wmX, wmY, wmSize, wmSize);
         ctx.restore();
 
         URL.revokeObjectURL(objUrl);
@@ -789,6 +791,28 @@ function exportReceiptJPG(){
   };
 
   tryExport();
+}
+
+
+function drawImageContain(ctx, img, x, y, w, h){
+  const iw = img.naturalWidth || img.width;
+  const ih = img.naturalHeight || img.height;
+  if (!iw || !ih){ ctx.drawImage(img, x, y, w, h); return; }
+  const s = Math.min(w/iw, h/ih);
+  const dw = iw*s;
+  const dh = ih*s;
+  const dx = x + (w - dw)/2;
+  const dy = y + (h - dh)/2;
+  ctx.drawImage(img, dx, dy, dw, dh);
+}
+function formatMoneyBR(value){
+  try{
+    return new Intl.NumberFormat("pt-BR").format(Math.round(value));
+  }catch(e){
+    // fallback simples
+    const s = String(Math.round(value));
+    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
 }
 
 function clipLine(ctx, line, maxWidth){
