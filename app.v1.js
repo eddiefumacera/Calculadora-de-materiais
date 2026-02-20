@@ -594,329 +594,113 @@ function downloadBlobUrl(blob, filename){
   setTimeout(() => URL.revokeObjectURL(url), 1500);
 }
 
+
 function exportReceiptJPG(){
   let lines = buildReceiptLinesPlain();
-  // evita repetir o nome no corpo (já está no cabeçalho)
+
+  // remove repetição do nome no corpo
   if (lines.length && lines[0].trim() === state.facName.trim()) lines = lines.slice(1);
 
+  const pad = 60;
+  const lineH = 30;
+  const headerH = 170;
 
-  const pad = 52;
-  const headerH = 150;
-  const lineH = 34;
-
-  // Limita linhas para evitar imagem gigantesca
   const maxLines = 120;
-  let safeLines = lines.slice(0, maxLines);
-  if (safeLines.length && /^=+$/.test(safeLines[0].trim())) safeLines = safeLines.slice(1);
+  const safeLines = lines.slice(0, maxLines);
 
-
-  // largura proporcional ao texto (com limites para não ficar gigante)
   const measureCanvas = document.createElement("canvas");
   const mctx = measureCanvas.getContext("2d");
-  mctx.font = "16px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+  mctx.font = "15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
   const maxLinePx = safeLines.reduce((mx, l) => Math.max(mx, mctx.measureText(l).width), 0);
-  const W = Math.max(760, Math.min(920, Math.ceil(maxLinePx + pad*2)));
 
-  const H = headerH + pad + safeLines.length * lineH + pad;
+  const W = Math.max(820, Math.min(960, Math.ceil(maxLinePx + pad*2)));
+  const H = headerH + pad + safeLines.length * lineH + 140;
 
   const canvas = document.createElement("canvas");
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext("2d");
 
-  // BG (clean premium)
+  // fundo
   ctx.fillStyle = "#0b0c10";
   ctx.fillRect(0,0,W,H);
 
-  // Gradientes sutis
-  const g1 = ctx.createRadialGradient(220, 80, 10, 220, 80, 520);
-  g1.addColorStop(0, "rgba(225,29,46,0.16)");
-  g1.addColorStop(1, "rgba(225,29,46,0)");
-  ctx.fillStyle = g1;
-  ctx.fillRect(0,0,W,headerH+100);
+  // card principal
+  const cardX = 40;
+  const cardY = 40;
+  const cardW = W - 80;
+  const cardH = H - 80;
 
-  const g2 = ctx.createRadialGradient(W-220, 120, 10, W-220, 120, 560);
-  g2.addColorStop(0, "rgba(255,255,255,0.06)");
-  g2.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = g2;
-  ctx.fillRect(0,0,W,headerH+140);
-
-  // Card principal
-  const cardX = 36, cardY = 28, cardW = W-72, cardH = H-56;
   roundRect(ctx, cardX, cardY, cardW, cardH, 24);
-  ctx.fillStyle = "rgba(16,16,22,0.78)";
+  ctx.fillStyle = "rgba(18,18,24,0.92)";
   ctx.fill();
   ctx.strokeStyle = "rgba(255,255,255,0.10)";
-  ctx.lineWidth = 1;
   ctx.stroke();
 
-  // Textura ultra discreta (noise)
-  noiseOverlay(ctx, cardX, cardY, cardW, cardH, 0.04);
+  // HEADER
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+  ctx.fillText(state.facName, cardX + pad + 100, cardY + 70);
 
-  // Watermark logo (se carregar)
-  const logo = new Image();
-  logo.crossOrigin = "anonymous";
+  ctx.font = "600 16px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+  ctx.fillStyle = "rgba(255,255,255,0.70)";
+  ctx.fillText("Orçamento / Lista", cardX + pad + 100, cardY + 100);
 
-  // Watermark logo (carrega como blob para evitar bloqueios de CORS/taint no canvas)
-  const draw = () => {
-    // Header line
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(cardX, cardY + headerH);
-    ctx.lineTo(cardX + cardW, cardY + headerH);
-    ctx.strokeStyle = "rgba(255,255,255,0.08)";
-    ctx.stroke();
-    ctx.restore();
+  // TOTAL BOX
+  const totals = calcTotals();
+  const totalBoxW = 260;
+  const totalBoxH = 90;
+  const totalBoxX = cardX + cardW - pad - totalBoxW;
+  const totalBoxY = cardY + 50;
 
-    // Text header
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-    ctx.fillText(state.facName, cardX + pad + 112, cardY + 66);
+  roundRect(ctx, totalBoxX, totalBoxY, totalBoxW, totalBoxH, 18);
+  ctx.fillStyle = "rgba(225,29,46,0.10)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(225,29,46,0.35)";
+  ctx.stroke();
 
-    ctx.fillStyle = "rgba(255,255,255,0.70)";
-    ctx.font = "600 16px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-    ctx.fillText("Orçamento / Lista", cardX + pad + 112, cardY + 92);
+  ctx.fillStyle = "rgba(255,255,255,0.80)";
+  ctx.font = "700 13px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+  ctx.fillText("TOTAL", totalBoxX + 18, totalBoxY + 28);
 
-    // Date (optional)
-    const now = new Date();
-    ctx.fillStyle = "rgba(255,255,255,0.55)";
-    ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-    const stamp = now.toLocaleDateString("pt-BR") + " " + now.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
-    ctx.fillText(stamp, cardX + cardW - pad - ctx.measureText(stamp).width, cardY + 92);
+  ctx.fillStyle = "rgba(255,255,255,0.95)";
+  ctx.font = "900 26px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+  ctx.fillText(formatKAsMoney(totals.valor), totalBoxX + 18, totalBoxY + 60);
 
-    // Bloco cliente/obs (se houver)
-    const client = (els.clientName && els.clientName.value ? els.clientName.value.trim() : "");
-    const note = (els.clientNote && els.clientNote.value ? els.clientNote.value.trim() : "");
-    let infoY = cardY + 112;
-
-    if (client || note){
-      ctx.fillStyle = "rgba(255,255,255,0.70)";
-      ctx.font = "650 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-      if (client){
-        ctx.fillText("Cliente:", cardX + pad + 112, infoY);
-        ctx.fillStyle = "rgba(255,255,255,0.92)";
-        ctx.font = "750 15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-        ctx.fillText(clipLine(ctx, client, 420), cardX + pad + 175, infoY);
-        infoY += 22;
-      }
-      if (note){
-        ctx.fillStyle = "rgba(255,255,255,0.70)";
-        ctx.font = "650 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-        ctx.fillText("Obs:", cardX + pad + 112, infoY);
-        ctx.fillStyle = "rgba(255,255,255,0.90)";
-        ctx.font = "650 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-        ctx.fillText(clipLine(ctx, note, 420), cardX + pad + 155, infoY);
-      }
-    }
-
-    // Caixa de totais (direita)
-    const totals = calcTotals();
-    const boxW = 240;
-    const boxH = 76;
-    const boxX = cardX + cardW - pad - boxW;
-    const boxY = cardY + 44;
-
-    roundRect(ctx, boxX, boxY, boxW, boxH, 16);
-    ctx.fillStyle = "rgba(0,0,0,0.22)";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.10)";
-    ctx.stroke();
-
-    ctx.fillStyle = "rgba(255,255,255,0.72)";
-    ctx.font = "800 11px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-    ctx.fillText("TOTAL", boxX + 14, boxY + 26);
-
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "900 22px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-    const totalK = Math.round(totals.valor);
-    const totalMoney = totalK * 1000;
-    const totalStr = `$${formatMoneyBR(totalMoney)}`;
-    ctx.fillText(totalStr, boxX + 14, boxY + 54);
-
-    ctx.fillStyle = "rgba(255,255,255,0.50)";
-    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
-    const modeLabel = (state.mode === "materials") ? "MATERIAIS" : (state.mode === "value" ? "VALORES" : "CALC");
-    ctx.fillText(modeLabel, boxX + boxW - 14 - ctx.measureText(modeLabel).width, boxY + 26);
-
-    // Pequena legenda de materiais (só no modo calculadora / materiais)
-    if (state.mode !== "value"){
-      const mline = `${state.materials.a}/${state.materials.b}/${state.materials.c}/${state.materials.d}/${state.materials.e}`;
-      ctx.fillStyle = "rgba(255,255,255,0.40)";
-      ctx.font = "11px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-      ctx.fillText(clipLine(ctx, mline, boxW-28), boxX + 14, boxY + 72);
-    }
-
-
-
-
-    // === Materiais (2 colunas) ===
-    if (state.mode !== "value"){
-      const mats = calcTotals();
-      const materialsList = [
-        ["Material A", mats.a],
-        ["Material B", mats.b],
-        ["Material C", mats.c],
-        ["Material D", mats.d],
-        ["Material E", mats.e],
-      ];
-      const colX1 = cardX + pad;
-      const colX2 = cardX + cardW/2;
-      let matY = cardY + headerH + 10;
-
-      ctx.fillStyle = "rgba(255,255,255,0.85)";
-      ctx.font = "700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-      ctx.fillText("MATERIAIS", colX1, matY);
-      matY += 22;
-
-      ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-      materialsList.forEach((m, i) => {
-        const txt = `${m[0]}: ${m[1]}`;
-        const x = (i % 2 === 0) ? colX1 : colX2;
-        const y = matY + Math.floor(i/2) * 24;
-        ctx.fillText(txt, x, y);
-      });
-    }
-
-    // Body text (mono)
-
-    ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-
-    // Draw lines with safe clipping
-    const maxW = cardX + cardW - pad;
-    let y = cardY + headerH + 44;
-    safeLines.forEach(line => {
-      const clipped = clipLine(ctx, line, maxW - (cardX + pad));
-      ctx.fillText(clipped, cardX + pad, y);
-      y += lineH;
-    });
-
-    // Export
-    canvas.toBlob((blob) => {
-      if (!blob) { alert("Falha ao gerar imagem (canvas bloqueado). Tente Ctrl+F5 e confira o logo em assets/logo.png"); return; }
-      
-      // === FAIXA TOTAL FINAL ===
-      const totalBoxH = 70;
-      const totalBoxY = cardY + cardH - totalBoxH - 20;
-      roundRect(ctx, cardX + pad, totalBoxY, cardW - pad*2, totalBoxH, 18);
-      ctx.fillStyle = "rgba(225,29,46,0.12)";
-      ctx.fill();
-      ctx.strokeStyle = "rgba(225,29,46,0.35)";
-      ctx.stroke();
-
-      ctx.fillStyle = "rgba(255,255,255,0.95)";
-      ctx.font = "900 24px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-      const finalStr = formatKAsMoney(calcTotals().valor);
-      ctx.fillText("TOTAL GERAL: " + finalStr, cardX + pad + 20, totalBoxY + 44);
-
-      downloadBlobUrl(blob, "orcamento_tropa_da_lb.jpg");
-
-    }, "image/jpeg", 0.92);
-  };
-
-
-  const logoUrl = "assets/logo.png";
-  const tryExport = async () => {
-    try{
-      const res = await fetch(logoUrl, { cache: "no-store" });
-      if (!res.ok) throw new Error("logo fetch failed");
-      const blob = await res.blob();
-      const objUrl = URL.createObjectURL(blob);
-
-      const img = new Image();
-      img.onload = () => {
-        // Logo badge
-        const badgeX = cardX + pad;
-        const badgeY = cardY + 36;
-        const s = 84;
-
-        roundRect(ctx, badgeX, badgeY, s+26, s+26, 18);
-        ctx.fillStyle = "rgba(0,0,0,0.28)";
-        ctx.fill();
-        ctx.strokeStyle = "rgba(255,255,255,0.10)";
-        ctx.stroke();
-
-        drawImageContain(ctx, img, badgeX+13, badgeY+13, s, s);
-
-        // Watermark
-        const wmSize = 620;
-        const wmX = Math.floor(cardX + (cardW - wmSize)/2);
-        const wmY = Math.floor(cardY + 120);
-        ctx.save();
-        ctx.globalAlpha = 0.10;
-        ctx.filter = "contrast(170%) brightness(125%) saturate(120%)";
-        drawImageContain(ctx, img, wmX, wmY, wmSize, wmSize);
-        ctx.restore();
-
-        URL.revokeObjectURL(objUrl);
-        draw();
-      };
-      img.onerror = () => { URL.revokeObjectURL(objUrl); draw(); };
-      img.src = objUrl;
-    }catch(e){
-      draw(); // exporta mesmo sem logo
-    }
-  };
-
-  tryExport();
-}
-
-
-function drawImageContain(ctx, img, x, y, w, h){
-  const iw = img.naturalWidth || img.width;
-  const ih = img.naturalHeight || img.height;
-  if (!iw || !ih){ ctx.drawImage(img, x, y, w, h); return; }
-  const s = Math.min(w/iw, h/ih);
-  const dw = iw*s;
-  const dh = ih*s;
-  const dx = x + (w - dw)/2;
-  const dy = y + (h - dh)/2;
-  ctx.drawImage(img, dx, dy, dw, dh);
-}
-function formatMoneyBR(value){
-  try{
-    return new Intl.NumberFormat("pt-BR").format(Math.round(value));
-  }catch(e){
-    // fallback simples
-    const s = String(Math.round(value));
-    return s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  }
-}
-
-function clipLine(ctx, line, maxWidth){
-  // corta com reticências se passar
-  if (ctx.measureText(line).width <= maxWidth) return line;
-  let s = line;
-  while (s.length > 0 && ctx.measureText(s + "…").width > maxWidth){
-    s = s.slice(0, -1);
-  }
-  return s.length ? (s + "…") : "";
-}
-
-function roundRect(ctx, x, y, w, h, r){
-  const min = Math.min(w,h);
-  if (r > min/2) r = min/2;
+  // linha separadora
   ctx.beginPath();
-  ctx.moveTo(x+r, y);
-  ctx.arcTo(x+w, y, x+w, y+h, r);
-  ctx.arcTo(x+w, y+h, x, y+h, r);
-  ctx.arcTo(x, y+h, x, y, r);
-  ctx.arcTo(x, y, x+w, y, r);
-  ctx.closePath();
+  ctx.moveTo(cardX + pad, cardY + headerH);
+  ctx.lineTo(cardX + cardW - pad, cardY + headerH);
+  ctx.strokeStyle = "rgba(255,255,255,0.08)";
+  ctx.stroke();
+
+  // CORPO
+  ctx.fillStyle = "rgba(255,255,255,0.92)";
+  ctx.font = "15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+
+  let y = cardY + headerH + 40;
+
+  safeLines.forEach(line => {
+    ctx.fillText(line, cardX + pad, y);
+    y += lineH;
+  });
+
+  canvas.toBlob((blob) => {
+    if (!blob){
+      alert("Erro ao gerar imagem.");
+      return;
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "orcamento_tropa_da_lb.jpg";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+  }, "image/jpeg", 0.92);
 }
 
-function noiseOverlay(ctx, x, y, w, h, alpha){
-  // ruído simples (sem libs)
-  const img = ctx.getImageData(x, y, w, h);
-  const d = img.data;
-  for (let i=0; i<d.length; i+=4){
-    const n = (Math.random()*255)|0;
-    d[i] = d[i] + (n-128)*alpha;
-    d[i+1] = d[i+1] + (n-128)*alpha;
-    d[i+2] = d[i+2] + (n-128)*alpha;
-  }
-  ctx.putImageData(img, x, y);
-}
 
 /* ---------- init ---------- */
 async function init(){
