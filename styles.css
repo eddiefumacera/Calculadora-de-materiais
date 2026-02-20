@@ -268,3 +268,22 @@ pre{
   .modechip{ font-size: 13px; padding: 7px 9px; }
   .logo{ width:48px; height:48px; }
 }
+
+
+/* Chip no lado direito */
+.actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.actions .modechip{
+  margin-right:8px;
+}
+
+@media (max-width: 720px){
+  .actions{
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
+}
