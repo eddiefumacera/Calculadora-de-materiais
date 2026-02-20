@@ -158,10 +158,10 @@
     }
   ],
   "materials": {
-    "a": "Material A",
-    "b": "Material B",
-    "c": "Material C",
-    "d": "Material D",
-    "e": "Material E"
+    "a": "Molas",
+    "b": "Canos",
+    "c": "Gatilhos",
+    "d": "Pratas",
+    "e": "Bronzes"
   }
 }
