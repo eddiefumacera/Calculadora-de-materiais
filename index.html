@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calculadora de Materiais — TROPA DA LB</title>
+  <link rel="stylesheet" href="styles.css?v=12" />
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge">
+        <img id="brandLogo" class="brand-logo" src="assets/logo.png" alt="Logo" />
+      </div>
+      <div class="brand-text">
+        <div class="brand-name" id="brandName">TROPA DA LB</div>
+        <div class="brand-sub" id="brandSub">Calculadora / Orçamento</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="chip" id="modeChip" title="Clique para alternar. Clique direito para menu.">
+        <span id="modeChipLabel">Calculadora</span>
+        <span class="chip-caret">▾</span>
+      </button>
+
+      <button class="btn" id="btnReset" type="button">Zerar</button>
+      <button class="btn primary" id="btnNote" type="button">Gerar nota</button>
+    </div>
+
+    <div class="chip-menu" id="chipMenu" role="menu" aria-hidden="true">
+      <button class="chip-item" data-mode="calc" type="button">Calculadora</button>
+      <button class="chip-item" data-mode="values" type="button">Somente valores</button>
+      <button class="chip-item" data-mode="materials" type="button">Somente materiais</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel filters">
+      <div class="field">
+        <label for="qSearch">Buscar</label>
+        <input id="qSearch" type="text" placeholder="Digite para filtrar..." />
+      </div>
+      <div class="field">
+        <label for="qCategory">Categoria</label>
+        <select id="qCategory"></select>
+      </div>
+      <div class="field right">
+        <label>&nbsp;</label>
+        <button class="toggle" id="btnOnlySelected" type="button" aria-pressed="false">
+          Mostrar somente selecionados
+        </button>
+      </div>
+    </section>
+
+    <section class="panel tablewrap" id="calcPanel">
+      <div class="table-head">
+        <div class="th">Item</div>
+        <div class="th">Categoria</div>
+        <div class="th center">Qtd</div>
+        <div class="th num" id="matAHead">Material A</div>
+        <div class="th num" id="matBHead">Material B</div>
+        <div class="th num" id="matCHead">Material C</div>
+        <div class="th num" id="matDHead">Material D</div>
+        <div class="th num" id="matEHead">Material E</div>
+        <div class="th num">Valor</div>
+      </div>
+      <div class="table-body" id="rows"></div>
+
+      <div class="totals">
+        <div class="totals-title">Totais</div>
+        <div class="totals-grid" id="totalsGrid"></div>
+        <div class="grand">
+          <div class="grand-label">Total</div>
+          <div class="grand-value" id="grandTotal">$0</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel compact" id="valuesPanel" hidden>
+      <div class="compact-head">
+        <div class="compact-title">Itens e valores</div>
+        <div class="compact-actions">
+          <button class="btn" id="btnCopyValues" type="button">Copiar</button>
+          <button class="btn" id="btnExportValuesJpg" type="button">Exportar JPG</button>
+        </div>
+      </div>
+      <pre class="mono" id="valuesText"></pre>
+    </section>
+
+    <section class="panel compact" id="materialsPanel" hidden>
+      <div class="compact-head">
+        <div class="compact-title">Materiais e quantidades</div>
+        <div class="compact-actions">
+          <button class="btn" id="btnCopyMaterials" type="button">Copiar</button>
+          <button class="btn" id="btnExportMaterialsJpg" type="button">Exportar JPG</button>
+        </div>
+      </div>
+      <pre class="mono" id="materialsText"></pre>
+    </section>
+
+    <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
+  </main>
+
+  <dialog class="modal" id="noteModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Nota / Orçamento</div>
+          <div class="modal-sub">Formato pronto para Discord</div>
+        </div>
+        <button class="iconbtn" id="btnCloseModal" aria-label="Fechar" type="button">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <pre class="mono big" id="noteText"></pre>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn" id="btnCopyNote" type="button">Copiar nota</button>
+        <button class="btn primary" id="btnExportNoteJpg" type="button">Exportar JPG</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="app.js?v=12"></script>
+</body>
+</html>
