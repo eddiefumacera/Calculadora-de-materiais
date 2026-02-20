@@ -595,7 +595,21 @@ function downloadBlobUrl(blob, filename){
 }
 
 
+
+function roundRect(ctx, x, y, w, h, r){
+  const min = Math.min(w,h);
+  if (r > min/2) r = min/2;
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
 function exportReceiptJPG(){
+  try{
   let lines = buildReceiptLinesPlain();
 
   // remove repetição do nome no corpo
@@ -699,6 +713,11 @@ function exportReceiptJPG(){
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1500);
   }, "image/jpeg", 0.92);
+  }catch(err){
+    console.error(err);
+    alert('Erro ao exportar JPG. Abra o Console (F12) para ver detalhes.');
+  }
+
 }
 
 
