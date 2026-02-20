@@ -578,10 +578,15 @@ function downloadDataUrl(dataUrl, filename){
 function exportReceiptJPG(){
   const lines = buildReceiptLinesPlain();
 
-  const W = 1180;
-  const pad = 56;
-  const headerH = 140;
-  const lineH = 26;
+  const pad = 52;
+  const headerH = 150;
+  const lineH = 30;
+  // largura proporcional ao texto (com limites para não ficar gigante)
+  const measureCanvas = document.createElement("canvas");
+  const mctx = measureCanvas.getContext("2d");
+  mctx.font = "16px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+  const maxLinePx = safeLines.reduce((mx, l) => Math.max(mx, mctx.measureText(l).width), 0);
+  const W = Math.max(820, Math.min(980, Math.ceil(maxLinePx + pad*2)));
 
   // Limita linhas para evitar imagem gigantesca (ainda dá pra copiar texto completo no botão Copiar nota)
   const maxLines = 120;
@@ -639,11 +644,11 @@ function exportReceiptJPG(){
 
     // Text header
     ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "800 26px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.font = "850 30px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
     ctx.fillText(state.facName, cardX + pad + 112, cardY + 66);
 
     ctx.fillStyle = "rgba(255,255,255,0.70)";
-    ctx.font = "600 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.font = "650 15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
     ctx.fillText("Orçamento / Lista", cardX + pad + 112, cardY + 92);
 
     // Date (optional)
@@ -653,9 +658,71 @@ function exportReceiptJPG(){
     const stamp = now.toLocaleDateString("pt-BR") + " " + now.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
     ctx.fillText(stamp, cardX + cardW - pad - ctx.measureText(stamp).width, cardY + 92);
 
+    // Bloco cliente/obs (se houver)
+    const client = (els.clientName && els.clientName.value ? els.clientName.value.trim() : "");
+    const note = (els.clientNote && els.clientNote.value ? els.clientNote.value.trim() : "");
+    let infoY = cardY + 112;
+
+    if (client || note){
+      ctx.fillStyle = "rgba(255,255,255,0.70)";
+      ctx.font = "650 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      if (client){
+        ctx.fillText("Cliente:", cardX + pad + 112, infoY);
+        ctx.fillStyle = "rgba(255,255,255,0.92)";
+        ctx.font = "750 15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+        ctx.fillText(clipLine(ctx, client, 420), cardX + pad + 175, infoY);
+        infoY += 22;
+      }
+      if (note){
+        ctx.fillStyle = "rgba(255,255,255,0.70)";
+        ctx.font = "650 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+        ctx.fillText("Obs:", cardX + pad + 112, infoY);
+        ctx.fillStyle = "rgba(255,255,255,0.90)";
+        ctx.font = "650 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+        ctx.fillText(clipLine(ctx, note, 420), cardX + pad + 155, infoY);
+      }
+    }
+
+    // Caixa de totais (direita)
+    const totals = calcTotals();
+    const boxW = 240;
+    const boxH = 76;
+    const boxX = cardX + cardW - pad - boxW;
+    const boxY = cardY + 44;
+
+    roundRect(ctx, boxX, boxY, boxW, boxH, 16);
+    ctx.fillStyle = "rgba(0,0,0,0.22)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(255,255,255,0.72)";
+    ctx.font = "800 11px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.fillText("TOTAL", boxX + 14, boxY + 26);
+
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.font = "900 22px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    const totalStr = `${Math.round(totals.valor)}k`;
+    ctx.fillText(totalStr, boxX + 14, boxY + 54);
+
+    ctx.fillStyle = "rgba(255,255,255,0.50)";
+    ctx.font = "12px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    const modeLabel = (state.mode === "materials") ? "MATERIAIS" : (state.mode === "value" ? "VALORES" : "CALC");
+    ctx.fillText(modeLabel, boxX + boxW - 14 - ctx.measureText(modeLabel).width, boxY + 26);
+
+    // Pequena legenda de materiais (só no modo calculadora / materiais)
+    if (state.mode !== "value"){
+      const mline = `${state.materials.a}/${state.materials.b}/${state.materials.c}/${state.materials.d}/${state.materials.e}`;
+      ctx.fillStyle = "rgba(255,255,255,0.40)";
+      ctx.font = "11px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      ctx.fillText(clipLine(ctx, mline, boxW-28), boxX + 14, boxY + 72);
+    }
+
+
+
     // Body text (mono)
     ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "14px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+    ctx.font = "16px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
 
     // Draw lines with safe clipping
     const maxW = cardX + cardW - pad;
@@ -690,8 +757,8 @@ function exportReceiptJPG(){
     const wmX = Math.floor(cardX + (cardW - wmSize)/2);
     const wmY = Math.floor(cardY + 120);
     ctx.save();
-    ctx.globalAlpha = 0.045;
-    ctx.filter = "grayscale(100%) contrast(120%)";
+    ctx.globalAlpha = 0.085;
+    ctx.filter = "grayscale(100%) contrast(160%) brightness(120%)";
     ctx.drawImage(logo, wmX, wmY, wmSize, wmSize);
     ctx.restore();
 
