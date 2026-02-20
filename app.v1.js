@@ -723,6 +723,12 @@ function exportReceiptJPG(){
 
 /* ---------- init ---------- */
 async function init(){
+  // cache-bust do logo (evita sumir por cache após updates)
+  const logoImg = document.querySelector('img.logo');
+  if (logoImg && logoImg.getAttribute('data-logo')){
+    logoImg.src = 'assets/logo.png?v=' + Date.now();
+  }
+
   const catalog = await fetchCatalog();
 
   state.facName = catalog.fac_name || state.facName;

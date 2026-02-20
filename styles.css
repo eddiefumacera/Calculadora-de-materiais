@@ -487,9 +487,9 @@ body::after{
   pointer-events: none;
   background-image: url("assets/logo.png");
   background-repeat: no-repeat;
-  background-position: center;
-  background-size: 780px;
-  opacity: 0.16;
+  background-position: center 120px;
+  background-size: 860px;
+  opacity: 0.20;
   filter: contrast(190%) brightness(150%) saturate(150%);
   transform: translateY(-20px);
   
