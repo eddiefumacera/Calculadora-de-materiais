@@ -335,7 +335,7 @@ function buildReceiptText(){
       rows.push([name, String(q)]);
     } else {
       // calculadora e valores: mostrar unit e parcial
-      rows.push([name, String(q), fmtK(unit), fmtK(lineTotal)]);
+      rows.push([name, String(q), formatKAsMoney(unit), formatKAsMoney(lineTotal)]);
     }
   }
 
@@ -393,7 +393,7 @@ function buildReceiptText(){
 
   // total no modo calculadora e valores
   if (state.mode !== "materials"){
-    lines.push(`TOTAL: ${fmtK(t.valor)}k`);
+    lines.push(`TOTAL: ${formatKAsMoney(t.valor)}`);
   }
 
   return lines.join("\n");
@@ -571,6 +571,28 @@ function formatMoney(n){
     return "$" + s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
 }
+
+function formatInt(n){
+  const v = Math.round(Number(n) || 0);
+  try{
+    return new Intl.NumberFormat('pt-BR').format(v);
+  }catch(_){
+    return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+}
+
+
+
+function formatInt(n){
+  const v = Math.round(Number(n) || 0);
+  try{
+    return new Intl.NumberFormat('pt-BR').format(v);
+  }catch(_){
+    // Fallback: dot as thousands separator
+    return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  }
+}
+
 function formatKAsMoney(k){
   return formatMoney(moneyFromK(k));
 }
@@ -608,7 +630,7 @@ function roundRect(ctx, x, y, w, h, r){
   ctx.closePath();
 }
 
-function exportReceiptJPG(){
+async function exportReceiptJPG(){
   try{
   let lines = buildReceiptLinesPlain();
 
@@ -651,14 +673,65 @@ function exportReceiptJPG(){
   ctx.strokeStyle = "rgba(255,255,255,0.10)";
   ctx.stroke();
 
+  // LOGO (same as preview)
+  const logoEl = document.querySelector('img.logo');
+  let logoH = 0;
+  if(logoEl){
+    try{
+      if(!logoEl.complete){
+        await new Promise((resolve)=>{ logoEl.onload = resolve; logoEl.onerror = resolve; });
+      }
+      const maxW = 140;
+      const maxH = 46;
+      const ratio = (logoEl.naturalWidth || 1) / (logoEl.naturalHeight || 1);
+      let w = Math.min(maxW, ratio * maxH);
+      let h = w / ratio;
+      if(h > maxH){ h = maxH; w = ratio * h; }
+      const x = cardX + pad;
+      const y = cardY + pad + 2;
+      ctx.globalAlpha = 0.98;
+      ctx.drawImage(logoEl, x, y, w, h);
+      ctx.globalAlpha = 1;
+      logoH = h;
+    }catch(_){}
+  }
+
+
+
+
+  // LOGO (same as preview)
+  const logoEl = document.querySelector('img.logo');
+  let logoH = 0;
+  if(logoEl){
+    try{
+      if(!logoEl.complete){
+        await new Promise((resolve)=>{ logoEl.onload = resolve; logoEl.onerror = resolve; });
+      }
+      const maxW = 140;
+      const maxH = 46;
+      const ratio = (logoEl.naturalWidth || 1) / (logoEl.naturalHeight || 1);
+      let w = Math.min(maxW, ratio * maxH);
+      let h = w / ratio;
+      if(h > maxH){ h = maxH; w = ratio * h; }
+      const x = cardX + pad;
+      const y = cardY + pad + 2;
+      ctx.globalAlpha = 0.98;
+      ctx.drawImage(logoEl, x, y, w, h);
+      ctx.globalAlpha = 1;
+      logoH = h;
+    }catch(_){}
+  }
+
+
   // HEADER
+  const headerShift = logoH ? 34 : 0;
   ctx.fillStyle = "rgba(255,255,255,0.95)";
   ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
-  ctx.fillText(state.facName, cardX + pad + 100, cardY + 70);
+  ctx.fillText(state.facName, cardX + pad + 100, cardY + 70 + headerShift);
 
   ctx.font = "600 16px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
   ctx.fillStyle = "rgba(255,255,255,0.70)";
-  ctx.fillText("Orçamento / Lista", cardX + pad + 100, cardY + 100);
+  ctx.fillText("Orçamento / Lista", cardX + pad + 100, cardY + 100 + headerShift);
 
   // TOTAL BOX
   const totals = calcTotals();
