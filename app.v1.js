@@ -558,6 +558,23 @@ function escapeHtml(str){
 }
 
 
+
+/* ---------- Formatação de dinheiro (k = mil) ---------- */
+function moneyFromK(k){
+  const n = Math.round(Number(k) || 0) * 1000;
+  return n;
+}
+function formatMoney(n){
+  try{ return "$" + new Intl.NumberFormat("pt-BR").format(Math.round(Number(n)||0)); }
+  catch(e){
+    const s = String(Math.round(Number(n)||0));
+    return "$" + s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  }
+}
+function formatKAsMoney(k){
+  return formatMoney(moneyFromK(k));
+}
+
 /* ---------- Export (JPG) — layout B (clean, identidade visual) ---------- */
 function buildReceiptLinesPlain(){
   // Texto sem blocos ``` para export de imagem
@@ -578,15 +595,20 @@ function downloadBlobUrl(blob, filename){
 }
 
 function exportReceiptJPG(){
-  const lines = buildReceiptLinesPlain();
+  let lines = buildReceiptLinesPlain();
+  // evita repetir o nome no corpo (já está no cabeçalho)
+  if (lines.length && lines[0].trim() === state.facName.trim()) lines = lines.slice(1);
+
 
   const pad = 52;
   const headerH = 150;
-  const lineH = 30;
+  const lineH = 34;
 
   // Limita linhas para evitar imagem gigantesca
   const maxLines = 120;
-  const safeLines = lines.slice(0, maxLines);
+  let safeLines = lines.slice(0, maxLines);
+  if (safeLines.length && /^=+$/.test(safeLines[0].trim())) safeLines = safeLines.slice(1);
+
 
   // largura proporcional ao texto (com limites para não ficar gigante)
   const measureCanvas = document.createElement("canvas");
@@ -648,11 +670,11 @@ function exportReceiptJPG(){
 
     // Text header
     ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "850 30px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.font = "900 32px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
     ctx.fillText(state.facName, cardX + pad + 112, cardY + 66);
 
     ctx.fillStyle = "rgba(255,255,255,0.70)";
-    ctx.font = "650 15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.font = "600 16px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
     ctx.fillText("Orçamento / Lista", cardX + pad + 112, cardY + 92);
 
     // Date (optional)
@@ -726,9 +748,39 @@ function exportReceiptJPG(){
 
 
 
+
+    // === Materiais (2 colunas) ===
+    if (state.mode !== "value"){
+      const mats = calcTotals();
+      const materialsList = [
+        ["Material A", mats.a],
+        ["Material B", mats.b],
+        ["Material C", mats.c],
+        ["Material D", mats.d],
+        ["Material E", mats.e],
+      ];
+      const colX1 = cardX + pad;
+      const colX2 = cardX + cardW/2;
+      let matY = cardY + headerH + 10;
+
+      ctx.fillStyle = "rgba(255,255,255,0.85)";
+      ctx.font = "700 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      ctx.fillText("MATERIAIS", colX1, matY);
+      matY += 22;
+
+      ctx.font = "14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      materialsList.forEach((m, i) => {
+        const txt = `${m[0]}: ${m[1]}`;
+        const x = (i % 2 === 0) ? colX1 : colX2;
+        const y = matY + Math.floor(i/2) * 24;
+        ctx.fillText(txt, x, y);
+      });
+    }
+
     // Body text (mono)
+
     ctx.fillStyle = "rgba(255,255,255,0.92)";
-    ctx.font = "16px Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.font = "15px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
 
     // Draw lines with safe clipping
     const maxW = cardX + cardW - pad;
@@ -742,7 +794,23 @@ function exportReceiptJPG(){
     // Export
     canvas.toBlob((blob) => {
       if (!blob) { alert("Falha ao gerar imagem (canvas bloqueado). Tente Ctrl+F5 e confira o logo em assets/logo.png"); return; }
+      
+      // === FAIXA TOTAL FINAL ===
+      const totalBoxH = 70;
+      const totalBoxY = cardY + cardH - totalBoxH - 20;
+      roundRect(ctx, cardX + pad, totalBoxY, cardW - pad*2, totalBoxH, 18);
+      ctx.fillStyle = "rgba(225,29,46,0.12)";
+      ctx.fill();
+      ctx.strokeStyle = "rgba(225,29,46,0.35)";
+      ctx.stroke();
+
+      ctx.fillStyle = "rgba(255,255,255,0.95)";
+      ctx.font = "900 24px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+      const finalStr = formatKAsMoney(calcTotals().valor);
+      ctx.fillText("TOTAL GERAL: " + finalStr, cardX + pad + 20, totalBoxY + 44);
+
       downloadBlobUrl(blob, "orcamento_tropa_da_lb.jpg");
+
     }, "image/jpeg", 0.92);
   };
 
