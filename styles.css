@@ -242,3 +242,29 @@ pre{
   white-space:pre-wrap;
 }
 .modal-actions{ display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+
+
+/* Chip de modo (logo-only header) */
+.brand{ display:flex; gap:12px; align-items:center; min-width: 120px; }
+.modechip{
+  font-family: var(--fontTitle);
+  font-weight: 700;
+  letter-spacing: .35px;
+  font-size: 14px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.14));
+  color: rgba(255,255,255,.92);
+  white-space: nowrap;
+}
+.modechip.is-accent{
+  border-color: rgba(225,29,46,.35);
+  background:
+    radial-gradient(220px 90px at 20% 0%, rgba(225,29,46,.28), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.14));
+}
+@media (max-width: 520px){
+  .modechip{ font-size: 13px; padding: 7px 9px; }
+  .logo{ width:48px; height:48px; }
+}

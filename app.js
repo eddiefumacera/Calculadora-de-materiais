@@ -4,8 +4,7 @@
 const state = { catalog: [], qty: {}, showMaterials: true, showCategory: true, onlyValue: false, onlyMaterials: false, materialLabels: { a:'Material A', b:'Material B', c:'Material C', d:'Material D', e:'Material E' } };
 
 const els = {
-  brandTitle: document.getElementById("brandTitle"),
-  brandSubtitle: document.getElementById("brandSubtitle"),
+  modeChip: document.getElementById("modeChip"),
   body: document.getElementById("itemsBody"),
   table: document.getElementById("itemsTable"),
   totals: document.getElementById("totals"),
@@ -37,16 +36,19 @@ function applyLabels(){
 
 
 function updateBrand(){
-  if (!els.brandTitle || !els.brandSubtitle) return;
+  if (!els.modeChip) return;
+
+  // Default
+  els.modeChip.classList.remove("is-accent");
+
   if (state.onlyValue) {
-    els.brandTitle.textContent = "Nota (valor)";
-    els.brandSubtitle.textContent = "Mostrando apenas valores • gere nota rápida";
+    els.modeChip.textContent = "Somente valor";
+    els.modeChip.classList.add("is-accent");
   } else if (state.onlyMaterials) {
-    els.brandTitle.textContent = "Materiais";
-    els.brandSubtitle.textContent = "Mostrando apenas materiais e quantidades";
+    els.modeChip.textContent = "Somente materiais";
+    els.modeChip.classList.add("is-accent");
   } else {
-    els.brandTitle.textContent = "Calculadora RP";
-    els.brandSubtitle.textContent = "Preencha quantidades • veja totais • gere nota";
+    els.modeChip.textContent = "Calculadora";
   }
 }
 
