@@ -1,7 +1,7 @@
 // Calculadora RP (genérica). Edite catalog.json para nomes/categorias/valores.
 // Materiais são genéricos: A–E.
 
-const state = { catalog: [], qty: {}, showMaterials: true, showCategory: true, onlyValue: false, materialLabels: { a:'Material A', b:'Material B', c:'Material C', d:'Material D', e:'Material E' } };
+const state = { catalog: [], qty: {}, showMaterials: true, showCategory: true, onlyValue: false, onlyMaterials: false, materialLabels: { a:'Material A', b:'Material B', c:'Material C', d:'Material D', e:'Material E' } };
 
 const els = {
   body: document.getElementById("itemsBody"),
@@ -20,6 +20,7 @@ const els = {
   toggleMaterials: document.getElementById("toggleMaterials"),
   toggleCategory: document.getElementById("toggleCategory"),
   toggleOnlyValue: document.getElementById("toggleOnlyValue"),
+  toggleOnlyMaterials: document.getElementById("toggleOnlyMaterials"),
 };
 
 const fmt = (n) => new Intl.NumberFormat("pt-BR").format(n);
@@ -50,28 +51,46 @@ function calcTotals(){
 }
 
 function applyColumnVisibility(){
-  const showMaterials = state.showMaterials && !state.onlyValue;
-  const showCategory = state.showCategory && !state.onlyValue;
+  const onlyValue = state.onlyValue;
+  const onlyMaterials = state.onlyMaterials;
+
+  const showMaterials = state.showMaterials && !onlyValue;
+  const showCategory = state.showCategory && !(onlyValue || onlyMaterials);
+  const showValueCol = !onlyMaterials;
 
   const ths = els.table.querySelectorAll("thead th");
   const hide = (node, yes) => node && (node.style.display = yes ? "none" : "");
 
+  // Categoria
   hide(ths[1], !showCategory);
+
+  // Materiais (A–E)
   for (let i=3;i<=7;i++) hide(ths[i], !showMaterials);
 
+  // Valor (k)
+  hide(ths[8], !showValueCol);
+
+  // Linhas
   els.body.querySelectorAll("tr").forEach(tr => {
     const tds = tr.querySelectorAll("td");
     hide(tds[1], !showCategory);
     for (let i=3;i<=7;i++) hide(tds[i], !showMaterials);
+    hide(tds[8], !showValueCol);
   });
 
+  // Cards de totais
   els.totals.querySelectorAll(".total").forEach(card => {
     const label = (card.querySelector(".label")?.textContent || "").toLowerCase();
     const isValor = label.includes("valor");
-    card.style.display = state.onlyValue ? (isValor ? "" : "none") : "";
+    if (onlyValue) card.style.display = isValor ? "" : "none";
+    else if (onlyMaterials) card.style.display = isValor ? "none" : "";
+    else card.style.display = "";
   });
 
-  els.btnCopyTotals.textContent = state.onlyValue ? "Copiar valor" : "Copiar totais";
+  // Texto do botão copiar
+  if (onlyValue) els.btnCopyTotals.textContent = "Copiar valor";
+  else if (onlyMaterials) els.btnCopyTotals.textContent = "Copiar materiais";
+  else els.btnCopyTotals.textContent = "Copiar totais";
 }
 
 function renderTotals(){
@@ -183,7 +202,9 @@ function buildReceiptText(){
     lines.push("");
   }
 
-  lines.push(`💰 Valor total: ${fmtK(t.valor)}`);
+  if (!state.onlyMaterials) {
+    lines.push(`💰 Valor total: ${fmtK(t.valor)}`);
+  }
   return lines.join("\n");
 }
 
@@ -216,9 +237,25 @@ async function init(){
   els.toggleCategory.addEventListener("change", () => { state.showCategory = els.toggleCategory.checked; applyColumnVisibility(); });
   els.toggleOnlyValue.addEventListener("change", () => {
     state.onlyValue = els.toggleOnlyValue.checked;
+    if (state.onlyValue) {
+      state.onlyMaterials = false;
+      if (els.toggleOnlyMaterials) els.toggleOnlyMaterials.checked = false;
+    }
     applyColumnVisibility();
     if (els.modal.getAttribute("aria-hidden") === "false") renderReceipt();
   });
+
+  if (els.toggleOnlyMaterials){
+    els.toggleOnlyMaterials.addEventListener("change", () => {
+      state.onlyMaterials = els.toggleOnlyMaterials.checked;
+      if (state.onlyMaterials) {
+        state.onlyValue = false;
+        els.toggleOnlyValue.checked = false;
+      }
+      applyColumnVisibility();
+      if (els.modal.getAttribute("aria-hidden") === "false") renderReceipt();
+    });
+  }
 
   els.btnReset.addEventListener("click", () => {
     state.catalog.forEach(i => state.qty[i.id] = 0);
@@ -231,9 +268,14 @@ async function init(){
 
   els.btnCopyTotals.addEventListener("click", async () => {
     const t = calcTotals();
-    const text = state.onlyValue
-      ? `Valor total: ${fmtK(t.valor)}`
-      : `${state.materialLabels.a}: ${fmt(t.a)} | ${state.materialLabels.b}: ${fmt(t.b)} | ${state.materialLabels.c}: ${fmt(t.c)} | ${state.materialLabels.d}: ${fmt(t.d)} | ${state.materialLabels.e}: ${fmt(t.e)} | Valor: ${fmtK(t.valor)}`;
+    let text = "";
+    if (state.onlyValue) {
+      text = `Valor total: ${fmtK(t.valor)}`;
+    } else if (state.onlyMaterials) {
+      text = `${state.materialLabels.a}: ${fmt(t.a)} | ${state.materialLabels.b}: ${fmt(t.b)} | ${state.materialLabels.c}: ${fmt(t.c)} | ${state.materialLabels.d}: ${fmt(t.d)} | ${state.materialLabels.e}: ${fmt(t.e)}`;
+    } else {
+      text = `${state.materialLabels.a}: ${fmt(t.a)} | ${state.materialLabels.b}: ${fmt(t.b)} | ${state.materialLabels.c}: ${fmt(t.c)} | ${state.materialLabels.d}: ${fmt(t.d)} | ${state.materialLabels.e}: ${fmt(t.e)} | Valor: ${fmtK(t.valor)}`;
+    }
     const ok = await copyText(text);
     els.copyHint.textContent = ok ? "Copiado!" : "Não foi possível copiar.";
     setTimeout(()=>els.copyHint.textContent="", 1400);
