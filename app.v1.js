@@ -45,6 +45,7 @@ const els = {
   receiptText: document.getElementById("receiptText"),
   btnCopy: document.getElementById("btnCopy"),
   btnCopyLink: document.getElementById("btnCopyLink"),
+  btnExportJPG: document.getElementById("btnExportJPG"),
 
   btnSaveHistory: document.getElementById("btnSaveHistory"),
   btnClearHistory: document.getElementById("btnClearHistory"),
@@ -556,6 +557,190 @@ function escapeHtml(str){
     .replaceAll("'","&#039;");
 }
 
+
+/* ---------- Export (JPG) — layout B (clean, identidade visual) ---------- */
+function buildReceiptLinesPlain(){
+  // Texto sem blocos ``` para export de imagem
+  const text = buildReceiptText();
+  const lines = text.split("\n").filter(l => l !== "```");
+  return lines;
+}
+
+function downloadDataUrl(dataUrl, filename){
+  const a = document.createElement("a");
+  a.href = dataUrl;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function exportReceiptJPG(){
+  const lines = buildReceiptLinesPlain();
+
+  const W = 1180;
+  const pad = 56;
+  const headerH = 140;
+  const lineH = 26;
+
+  // Limita linhas para evitar imagem gigantesca (ainda dá pra copiar texto completo no botão Copiar nota)
+  const maxLines = 120;
+  const safeLines = lines.slice(0, maxLines);
+
+  const H = headerH + pad + safeLines.length * lineH + pad;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext("2d");
+
+  // BG (clean premium)
+  ctx.fillStyle = "#0b0c10";
+  ctx.fillRect(0,0,W,H);
+
+  // Gradientes sutis
+  const g1 = ctx.createRadialGradient(220, 80, 10, 220, 80, 520);
+  g1.addColorStop(0, "rgba(225,29,46,0.16)");
+  g1.addColorStop(1, "rgba(225,29,46,0)");
+  ctx.fillStyle = g1;
+  ctx.fillRect(0,0,W,headerH+100);
+
+  const g2 = ctx.createRadialGradient(W-220, 120, 10, W-220, 120, 560);
+  g2.addColorStop(0, "rgba(255,255,255,0.06)");
+  g2.addColorStop(1, "rgba(255,255,255,0)");
+  ctx.fillStyle = g2;
+  ctx.fillRect(0,0,W,headerH+140);
+
+  // Card principal
+  const cardX = 36, cardY = 28, cardW = W-72, cardH = H-56;
+  roundRect(ctx, cardX, cardY, cardW, cardH, 24);
+  ctx.fillStyle = "rgba(16,16,22,0.78)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255,0.10)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Textura ultra discreta (noise)
+  noiseOverlay(ctx, cardX, cardY, cardW, cardH, 0.04);
+
+  // Watermark logo (se carregar)
+  const logo = new Image();
+  logo.crossOrigin = "anonymous";
+
+  const draw = () => {
+    // Header line
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(cardX, cardY + headerH);
+    ctx.lineTo(cardX + cardW, cardY + headerH);
+    ctx.strokeStyle = "rgba(255,255,255,0.08)";
+    ctx.stroke();
+    ctx.restore();
+
+    // Text header
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.font = "800 26px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.fillText(state.facName, cardX + pad + 112, cardY + 66);
+
+    ctx.fillStyle = "rgba(255,255,255,0.70)";
+    ctx.font = "600 14px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    ctx.fillText("Orçamento / Lista", cardX + pad + 112, cardY + 92);
+
+    // Date (optional)
+    const now = new Date();
+    ctx.fillStyle = "rgba(255,255,255,0.55)";
+    ctx.font = "12px system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif";
+    const stamp = now.toLocaleDateString("pt-BR") + " " + now.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+    ctx.fillText(stamp, cardX + cardW - pad - ctx.measureText(stamp).width, cardY + 92);
+
+    // Body text (mono)
+    ctx.fillStyle = "rgba(255,255,255,0.92)";
+    ctx.font = "14px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
+
+    // Draw lines with safe clipping
+    const maxW = cardX + cardW - pad;
+    let y = cardY + headerH + 44;
+    safeLines.forEach(line => {
+      const clipped = clipLine(ctx, line, maxW - (cardX + pad));
+      ctx.fillText(clipped, cardX + pad, y);
+      y += lineH;
+    });
+
+    // Export
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    downloadDataUrl(dataUrl, "orcamento_tropa_da_lb.jpg");
+  };
+
+  logo.onload = () => {
+    // Logo badge
+    const badgeX = cardX + pad;
+    const badgeY = cardY + 36;
+    const s = 84;
+
+    roundRect(ctx, badgeX, badgeY, s+26, s+26, 18);
+    ctx.fillStyle = "rgba(0,0,0,0.28)";
+    ctx.fill();
+    ctx.strokeStyle = "rgba(255,255,255,0.10)";
+    ctx.stroke();
+
+    ctx.drawImage(logo, badgeX+13, badgeY+13, s, s);
+
+    // Watermark
+    const wmSize = 620;
+    const wmX = Math.floor(cardX + (cardW - wmSize)/2);
+    const wmY = Math.floor(cardY + 120);
+    ctx.save();
+    ctx.globalAlpha = 0.045;
+    ctx.filter = "grayscale(100%) contrast(120%)";
+    ctx.drawImage(logo, wmX, wmY, wmSize, wmSize);
+    ctx.restore();
+
+    draw();
+  };
+
+  logo.onerror = () => {
+    // Sem logo — exporta mesmo
+    draw();
+  };
+
+  logo.src = "assets/logo.png";
+}
+
+function clipLine(ctx, line, maxWidth){
+  // corta com reticências se passar
+  if (ctx.measureText(line).width <= maxWidth) return line;
+  let s = line;
+  while (s.length > 0 && ctx.measureText(s + "…").width > maxWidth){
+    s = s.slice(0, -1);
+  }
+  return s.length ? (s + "…") : "";
+}
+
+function roundRect(ctx, x, y, w, h, r){
+  const min = Math.min(w,h);
+  if (r > min/2) r = min/2;
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.arcTo(x+w, y, x+w, y+h, r);
+  ctx.arcTo(x+w, y+h, x, y+h, r);
+  ctx.arcTo(x, y+h, x, y, r);
+  ctx.arcTo(x, y, x+w, y, r);
+  ctx.closePath();
+}
+
+function noiseOverlay(ctx, x, y, w, h, alpha){
+  // ruído simples (sem libs)
+  const img = ctx.getImageData(x, y, w, h);
+  const d = img.data;
+  for (let i=0; i<d.length; i+=4){
+    const n = (Math.random()*255)|0;
+    d[i] = d[i] + (n-128)*alpha;
+    d[i+1] = d[i+1] + (n-128)*alpha;
+    d[i+2] = d[i+2] + (n-128)*alpha;
+  }
+  ctx.putImageData(img, x, y);
+}
+
 /* ---------- init ---------- */
 async function init(){
   const catalog = await fetchCatalog();
@@ -636,6 +821,8 @@ async function init(){
   els.btnCopyLink.addEventListener("click", async () => {
     await copyText(location.href);
   });
+
+  if (els.btnExportJPG) els.btnExportJPG.addEventListener("click", exportReceiptJPG);
 
   // history
   els.btnSaveHistory.addEventListener("click", () => {

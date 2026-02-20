@@ -53,7 +53,7 @@ body::before{
 .fatal[aria-hidden="false"]{ display:block; }
 .fatal-inner{ max-width:1200px; margin:0 auto; font-size:14px; }
 
-.topbar{
+.topbar{ z-index:2; 
   position:sticky;
   top:0;
   z-index:50;
@@ -68,21 +68,28 @@ body::before{
 }
 
 .brand{
+  position:relative;
   display:flex;
   align-items:center;
   gap:14px;
 }
 .logo{
+  width:110px; height:110px;
   object-fit: contain;
   display:block;
-
-  width:86px; height:86px;
-  border-radius:22px;
-  padding:10px;
+  position: relative;
+  z-index: 3;
+  transform: translateY(16px);
+  border-radius: 22px;
+  padding: 12px;
   background: linear-gradient(145deg, rgba(20,20,24,.92), rgba(10,10,12,.92));
-  border:1px solid rgba(255,255,255,.09);
-  box-shadow: 0 24px 60px rgba(0,0,0,.70), 0 0 0 8px rgba(225,29,46,.12), 0 0 70px rgba(225,29,46,.38);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow:
+    0 30px 80px rgba(0,0,0,.75),
+    0 0 0 10px rgba(225,29,46,.10),
+    0 0 90px rgba(225,29,46,.40);
 }
+
 .facname{
   font-weight:800;
   letter-spacing:4px;
@@ -164,7 +171,7 @@ body::before{
   box-shadow: 0 12px 30px rgba(225,29,46,.22);
 }
 
-.wrap{ max-width: 1200px; margin: 24px auto; padding: 0 16px 36px; }
+.wrap{ position:relative; z-index:1;  max-width: 1200px; margin: 24px auto; padding: 0 16px 36px; }
 .panel{ display:flex; flex-direction:column; gap:14px; }
 .controls{
   display:grid;
@@ -437,4 +444,22 @@ td.qty{ width:170px; }
   background: rgba(225,29,46,.18);
   box-shadow: 0 0 0 5px rgba(225,29,46,.12);
   color: #fff;
+}
+
+/* spacer in modal actions */
+.modal-actions{ align-items:center; }
+.modal-actions .spacer{ flex: 1 1 auto; }
+
+/* ===== MARCA D'ÁGUA (logo no fundo) ===== */
+body::after{
+  content:"";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .035;
+  background-image: url("assets/logo.png");
+  background-repeat: no-repeat;
+  background-position: center 140px;
+  background-size: 620px;
+  filter: grayscale(100%) contrast(120%);
 }
