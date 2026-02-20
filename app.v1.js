@@ -634,6 +634,7 @@ function exportReceiptJPG(){
   const logo = new Image();
   logo.crossOrigin = "anonymous";
 
+  // Watermark logo (carrega como blob para evitar bloqueios de CORS/taint no canvas)
   const draw = () => {
     // Header line
     ctx.save();
@@ -737,44 +738,56 @@ function exportReceiptJPG(){
 
     // Export
     canvas.toBlob((blob) => {
-      if (!blob) return;
+      if (!blob) { alert("Falha ao gerar imagem (canvas bloqueado). Tente Ctrl+F5 e confira o logo em assets/logo.png"); return; }
       downloadBlobUrl(blob, "orcamento_tropa_da_lb.jpg");
     }, "image/jpeg", 0.92);
   };
 
-  logo.onload = () => {
-    // Logo badge
-    const badgeX = cardX + pad;
-    const badgeY = cardY + 36;
-    const s = 84;
 
-    roundRect(ctx, badgeX, badgeY, s+26, s+26, 18);
-    ctx.fillStyle = "rgba(0,0,0,0.28)";
-    ctx.fill();
-    ctx.strokeStyle = "rgba(255,255,255,0.10)";
-    ctx.stroke();
+  const logoUrl = "assets/logo.png";
+  const tryExport = async () => {
+    try{
+      const res = await fetch(logoUrl, { cache: "no-store" });
+      if (!res.ok) throw new Error("logo fetch failed");
+      const blob = await res.blob();
+      const objUrl = URL.createObjectURL(blob);
 
-    ctx.drawImage(logo, badgeX+13, badgeY+13, s, s);
+      const img = new Image();
+      img.onload = () => {
+        // Logo badge
+        const badgeX = cardX + pad;
+        const badgeY = cardY + 36;
+        const s = 84;
 
-    // Watermark
-    const wmSize = 620;
-    const wmX = Math.floor(cardX + (cardW - wmSize)/2);
-    const wmY = Math.floor(cardY + 120);
-    ctx.save();
-    ctx.globalAlpha = 0.085;
-    ctx.filter = "grayscale(100%) contrast(160%) brightness(120%)";
-    ctx.drawImage(logo, wmX, wmY, wmSize, wmSize);
-    ctx.restore();
+        roundRect(ctx, badgeX, badgeY, s+26, s+26, 18);
+        ctx.fillStyle = "rgba(0,0,0,0.28)";
+        ctx.fill();
+        ctx.strokeStyle = "rgba(255,255,255,0.10)";
+        ctx.stroke();
 
-    draw();
+        ctx.drawImage(img, badgeX+13, badgeY+13, s, s);
+
+        // Watermark
+        const wmSize = 620;
+        const wmX = Math.floor(cardX + (cardW - wmSize)/2);
+        const wmY = Math.floor(cardY + 120);
+        ctx.save();
+        ctx.globalAlpha = 0.10;
+        ctx.filter = "contrast(170%) brightness(125%) saturate(120%)";
+        ctx.drawImage(img, wmX, wmY, wmSize, wmSize);
+        ctx.restore();
+
+        URL.revokeObjectURL(objUrl);
+        draw();
+      };
+      img.onerror = () => { URL.revokeObjectURL(objUrl); draw(); };
+      img.src = objUrl;
+    }catch(e){
+      draw(); // exporta mesmo sem logo
+    }
   };
 
-  logo.onerror = () => {
-    // Sem logo — exporta mesmo
-    draw();
-  };
-
-  logo.src = "assets/logo.png";
+  tryExport();
 }
 
 function clipLine(ctx, line, maxWidth){
