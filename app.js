@@ -4,6 +4,8 @@
 const state = { catalog: [], qty: {}, showMaterials: true, showCategory: true, onlyValue: false, onlyMaterials: false, materialLabels: { a:'Material A', b:'Material B', c:'Material C', d:'Material D', e:'Material E' } };
 
 const els = {
+  brandTitle: document.getElementById("brandTitle"),
+  brandSubtitle: document.getElementById("brandSubtitle"),
   body: document.getElementById("itemsBody"),
   table: document.getElementById("itemsTable"),
   totals: document.getElementById("totals"),
@@ -33,6 +35,20 @@ function applyLabels(){
   });
 }
 
+
+function updateBrand(){
+  if (!els.brandTitle || !els.brandSubtitle) return;
+  if (state.onlyValue) {
+    els.brandTitle.textContent = "Nota (valor)";
+    els.brandSubtitle.textContent = "Mostrando apenas valores • gere nota rápida";
+  } else if (state.onlyMaterials) {
+    els.brandTitle.textContent = "Materiais";
+    els.brandSubtitle.textContent = "Mostrando apenas materiais e quantidades";
+  } else {
+    els.brandTitle.textContent = "Calculadora RP";
+    els.brandSubtitle.textContent = "Preencha quantidades • veja totais • gere nota";
+  }
+}
 
 function calcTotals(){
   const t = { a:0, b:0, c:0, d:0, e:0, valor:0 };
@@ -91,6 +107,8 @@ function applyColumnVisibility(){
   if (onlyValue) els.btnCopyTotals.textContent = "Copiar valor";
   else if (onlyMaterials) els.btnCopyTotals.textContent = "Copiar materiais";
   else els.btnCopyTotals.textContent = "Copiar totais";
+
+  updateBrand();
 }
 
 function renderTotals(){
@@ -297,6 +315,7 @@ async function init(){
   els.btnPrint.addEventListener("click", () => window.print());
 
   renderTable();
+  updateBrand();
 }
 
 init().catch(err => {
