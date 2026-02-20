@@ -265,7 +265,7 @@ function renderTable(){
         <td class="mat col-mat col-c" data-mat="c">${fmt(c)}</td>
         <td class="mat col-mat col-d" data-mat="d">${fmt(d)}</td>
         <td class="mat col-mat col-e" data-mat="e">${fmt(e)}</td>
-        <td class="val col-val col-value">${fmtK(val)}</td>
+        <td class="val col-val col-value">${formatKAsMoney(val)}</td>
       </tr>
     `;
   }).join("");
@@ -297,7 +297,7 @@ function renderTotals(){
   els.totC.textContent = fmt(t.c);
   els.totD.textContent = fmt(t.d);
   els.totE.textContent = fmt(t.e);
-  els.totV.textContent = fmtK(t.valor);
+  els.totV.textContent = formatKAsMoney(t.valor);
 }
 
 /* ---------- Receipt (Discord-friendly columns) ---------- */
@@ -571,17 +571,6 @@ function formatMoney(n){
     return "$" + s.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   }
 }
-
-function formatInt(n){
-  const v = Math.round(Number(n) || 0);
-  try{
-    return new Intl.NumberFormat('pt-BR').format(v);
-  }catch(_){
-    return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  }
-}
-
-
 
 function formatInt(n){
   const v = Math.round(Number(n) || 0);
@@ -928,10 +917,13 @@ async function init(){
   });
 }
 
-try{
-  init();
-}catch(err){
+// init() é async: se der erro (ex: catalog.json não carregou), precisamos capturar o reject.
+init().catch((err) => {
   console.error(err);
   const el = document.getElementById("fatalError");
-  if (el) el.setAttribute("aria-hidden","false");
-}
+  if (el) el.setAttribute("aria-hidden", "false");
+  // Ajuda o usuário a diagnosticar rápido em GitHub Pages
+  try {
+    alert("Erro ao iniciar. Verifique se catalog.json está publicado e tente Ctrl+F5.");
+  } catch (_) {}
+});
