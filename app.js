@@ -408,20 +408,20 @@ function renderTable(){
 
 function buildReceiptText(){
   const t = calcTotals();
-  const now = new Date();
-  const stamp = now.toLocaleString("pt-BR");
-  const client = (els.clientName.value || "").trim();
-  const note = (els.clientNote.value || "").trim();
 
   const lines = [];
-  lines.push("📄 NOTA (RP)");
-  lines.push(`🕒 ${stamp}`);
-  if (client) lines.push(`👤 Cliente: ${client}`);
-  if (note) lines.push(`📝 Obs: ${note}`);
-  lines.push("");
+  // Cabeçalho (cliente/fac)
+  lines.push("TROPA DA LB");
+  lines.push("================================");
 
-  const chosen = [];
-  
+  const client = (els.clientName?.value || "").trim();
+  const note = (els.clientNote?.value || "").trim();
+  if (client) lines.push(`Cliente: ${client}`);
+  if (note) lines.push(`Obs: ${note}`);
+  if (client || note) lines.push("");
+
+  // Itens em colunas (Discord friendly)
+  const rows = [];
   const items = [...state.catalog].sort((a,b) => {
     const qa = Number(state.qty[a.id] || 0);
     const qb = Number(state.qty[b.id] || 0);
@@ -429,29 +429,66 @@ function buildReceiptText(){
     if (qb !== qa) return qb - qa;
     return getItemName(a).localeCompare(getItemName(b),'pt-BR');
   });
+
   for (const item of items){
     const q = Number(state.qty[item.id] || 0);
     if (q <= 0) continue;
 
+    const name = getItemName(item);
     const unit = Number(item.value_k || 0);
     const lineTotal = unit * q;
-    
+
     if (state.onlyMaterials){
-      chosen.push(`• ${item.name} x ${q}`);
+      rows.push([name, String(q)]);
     } else {
-      chosen.push(`• ${item.name} x ${q} — ${fmtK(unit)} cada — Parcial: ${fmtK(lineTotal)}`);
+      rows.push([name, String(q), fmtK(unit), fmtK(lineTotal)]);
     }
   }
 
-  lines.push("📦 Itens:");
-  lines.push(chosen.length ? chosen.join("
-") : "• (nenhum)");
-  if (!state.onlyMaterials){
-  }
-  lines.push("");
+  lines.push("Itens:");
+  if (!rows.length){
+    lines.push("• (nenhum)");
+    lines.push("");
+  } else if (state.onlyMaterials){
+    const nameW = Math.min(34, Math.max(...rows.map(r => r[0].length), 4));
+    const qtyW  = Math.max(...rows.map(r => r[1].length), 3);
 
+    const header = ["ITEM".padEnd(nameW), "QTD".padStart(qtyW)].join("  ");
+    const sep = "-".repeat(header.length);
+    const body = rows.map(r => [r[0].slice(0,nameW).padEnd(nameW), r[1].padStart(qtyW)].join("  ")).join("\n");
+
+    lines.push("```");
+    lines.push(header);
+    lines.push(sep);
+    lines.push(body);
+    lines.push("```");
+    lines.push("");
+  } else {
+    const nameW = Math.min(34, Math.max(...rows.map(r => r[0].length), 4));
+    const qtyW  = Math.max(...rows.map(r => r[1].length), 3);
+    const unitW = Math.max(...rows.map(r => r[2].length), 4);
+    const parW  = Math.max(...rows.map(r => r[3].length), 7);
+
+    const header = ["ITEM".padEnd(nameW), "QTD".padStart(qtyW), "UNIT".padStart(unitW), "PARCIAL".padStart(parW)].join("  ");
+    const sep = "-".repeat(header.length);
+    const body = rows.map(r => [
+      r[0].slice(0,nameW).padEnd(nameW),
+      r[1].padStart(qtyW),
+      r[2].padStart(unitW),
+      r[3].padStart(parW)
+    ].join("  ")).join("\n");
+
+    lines.push("```");
+    lines.push(header);
+    lines.push(sep);
+    lines.push(body);
+    lines.push("```");
+    lines.push("");
+  }
+
+  // Materiais
   if (!state.onlyValue){
-    lines.push("🧾 Totais:");
+    lines.push("Materiais:");
     lines.push(`• ${state.materialLabels.a}: ${fmt(t.a)}`);
     lines.push(`• ${state.materialLabels.b}: ${fmt(t.b)}`);
     lines.push(`• ${state.materialLabels.c}: ${fmt(t.c)}`);
@@ -460,11 +497,14 @@ function buildReceiptText(){
     lines.push("");
   }
 
+  // Total final
   if (!state.onlyMaterials) {
-    lines.push(`💰 Valor total: ${fmtK(t.valor)}`);
+    lines.push(`TOTAL: ${fmtK(t.valor)}`);
   }
+
   return lines.join("\n");
 }
+
 
 function renderReceipt(){ els.receiptText.textContent = buildReceiptText(); }
 
