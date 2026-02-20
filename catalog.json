@@ -1,9 +1,9 @@
 {
   "items": [
     {
-      "id": "item_01",
-      "name": "Item 01",
-      "category": "Classe 1",
+      "id": "PARAFAL",
+      "name": "PARAFAL",
+      "category": "FUZIL",
       "value_k": 405,
       "recipe": {
         "a": 22,
@@ -14,9 +14,9 @@
       }
     },
     {
-      "id": "item_02",
-      "name": "Item 02",
-      "category": "Classe 1",
+      "id": "FUZIL MILITAR AUG",
+      "name": "FUZIL MILITAR AUG",
+      "category": "FUZIL",
       "value_k": 405,
       "recipe": {
         "a": 22,
@@ -27,9 +27,9 @@
       }
     },
     {
-      "id": "item_03",
-      "name": "Item 03",
-      "category": "Classe 1",
+      "id": "SCAR",
+      "name": "SCAR",
+      "category": "FUZIL",
       "value_k": 405,
       "recipe": {
         "a": 22,
@@ -40,9 +40,9 @@
       }
     },
     {
-      "id": "item_04",
-      "name": "Item 04",
-      "category": "Classe 1",
+      "id": "AK47",
+      "name": "AK47",
+      "category": "FUZIL",
       "value_k": 405,
       "recipe": {
         "a": 22,
@@ -53,9 +53,9 @@
       }
     },
     {
-      "id": "item_05",
-      "name": "Item 05",
-      "category": "Classe 1",
+      "id": "NSR",
+      "name": "NSR",
+      "category": "FUZIL",
       "value_k": 420,
       "recipe": {
         "a": 24,
@@ -66,9 +66,9 @@
       }
     },
     {
-      "id": "item_06",
-      "name": "Item 06",
-      "category": "Classe 2",
+      "id": "TEC9",
+      "name": "TEC9",
+      "category": "SMG",
       "value_k": 270,
       "recipe": {
         "a": 12,
@@ -79,9 +79,9 @@
       }
     },
     {
-      "id": "item_07",
-      "name": "Item 07",
-      "category": "Classe 2",
+      "id": "SMGMK2",
+      "name": "SMGMK2",
+      "category": "SMG",
       "value_k": 270,
       "recipe": {
         "a": 16,
@@ -92,9 +92,9 @@
       }
     },
     {
-      "id": "item_08",
-      "name": "Item 08",
-      "category": "Classe 2",
+      "id": "MP9",
+      "name": "MP9",
+      "category": "SMG",
       "value_k": 270,
       "recipe": {
         "a": 16,
@@ -105,9 +105,9 @@
       }
     },
     {
-      "id": "item_09",
-      "name": "Item 09",
-      "category": "Classe 2",
+      "id": "MTAR",
+      "name": "MTAR",
+      "category": "SMG",
       "value_k": 270,
       "recipe": {
         "a": 18,
@@ -118,9 +118,9 @@
       }
     },
     {
-      "id": "item_10",
-      "name": "Item 10",
-      "category": "Classe 2",
+      "id": "SCORPION",
+      "name": "SCORPION",
+      "category": "SMG",
       "value_k": 290,
       "recipe": {
         "a": 14,
@@ -131,9 +131,9 @@
       }
     },
     {
-      "id": "item_11",
-      "name": "Item 11",
-      "category": "Classe 3",
+      "id": "FIVESEVEN",
+      "name": "FIVESEVEN",
+      "category": "PISTOLA",
       "value_k": 180,
       "recipe": {
         "a": 10,
@@ -144,9 +144,9 @@
       }
     },
     {
-      "id": "item_12",
-      "name": "Item 12",
-      "category": "Classe 3",
+      "id": "M9A3",
+      "name": "M9A3",
+      "category": "PISTOLA",
       "value_k": 200,
       "recipe": {
         "a": 10,
