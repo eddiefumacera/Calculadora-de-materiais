@@ -1,4 +1,4 @@
-/* Clean premium dark theme (stable) */
+r/* Clean premium dark theme (stable) */
 :root{
   --bg0:#060608; --bg1:#0b0c10;
   --card:rgba(15,17,24,.92);
@@ -153,7 +153,7 @@ input:focus,select:focus{border-color: rgba(255,43,74,.35); box-shadow: 0 0 0 4p
 }
 .th{font-size:15px; font-weight:700; color:rgba(233,236,243,.98); text-transform:uppercase; letter-spacing:.10em}
 .th.center{text-align:center}
-.th.num{text-align:right}
+.th.num{text-align:center}
 .table-body{margin-top:10px; display:flex; flex-direction:column; gap:10px}
 .row{
   padding:12px 14px;
