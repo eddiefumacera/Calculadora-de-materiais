@@ -30,7 +30,7 @@ body{
   background-repeat:no-repeat,no-repeat;
   background-position:center center, center center;
   background-size: 100% 100%, 980px;
-  opacity:.04;
+  opacity:.03;
   filter: saturate(.95) contrast(1.10);
 }
 .bg::after{
@@ -39,7 +39,7 @@ body{
     radial-gradient(circle at 20% 30%, rgba(255,255,255,.03) 0 1px, transparent 2px),
     radial-gradient(circle at 70% 60%, rgba(255,255,255,.025) 0 1px, transparent 2px);
   background-size: 14px 14px, 18px 18px;
-  opacity:.18; mix-blend-mode: overlay;
+  opacity:.08; mix-blend-mode: overlay;
 }
 .topbar{
   position:sticky; top:0; z-index:50;
