@@ -132,7 +132,7 @@ input,select{
   width:100%; padding:12px 14px;
   border-radius:14px;
   border:1px solid var(--stroke2);
-  background: rgba(0,0,0,.25);
+  background: rgba(0,0,0,.65);
   color: var(--text);
   outline:none;
 }
@@ -146,7 +146,7 @@ input:focus,select:focus{border-color: rgba(255,43,74,.35); box-shadow: 0 0 0 4p
   gap:10px; align-items:center;
 }
 .table-head{
-  background: rgba(255,255,255,.56);
+  background: rgba(255,255,255,.16);
   border:1px solid var(--stroke);
   padding:12px 14px;
   border-radius:999px;
