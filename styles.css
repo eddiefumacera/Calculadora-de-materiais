@@ -159,7 +159,7 @@ input:focus,select:focus{border-color: rgba(255,43,74,.35); box-shadow: 0 0 0 4p
   padding:12px 14px;
   border-radius:16px;
   border:1px solid var(--stroke);
-  background: rgba(0,0,0,.24);
+  background: rgba(0,0,0,.64);
   color: var(--text);
   font-weight: 700;
 }
