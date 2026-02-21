@@ -161,7 +161,7 @@ input:focus,select:focus{border-color: rgba(255,43,74,.35); box-shadow: 0 0 0 4p
   border:1px solid var(--stroke);
   background: rgba(0,0,0,.24);
   color: var(--text);
-  font-weight: 650;
+  font-weight: 700;
 }
 .row.selected{background: rgba(255,43,74,.10); border-color: rgba(255,43,74,.18)}
 .item-name{font-weight:700}
