@@ -1,7 +1,7 @@
 /* Clean premium dark theme (stable) */
 :root{
   --bg0:#060608; --bg1:#0b0c10;
-  --card:rgba(15,17,24,.82);
+  --card:rgba(15,17,24,.92);
   --stroke:rgba(255,255,255,.10);
   --stroke2:rgba(255,255,255,.18);
   --text:#e9ecf3; --muted:#b6b9c4;
