@@ -163,7 +163,7 @@ input:focus,select:focus{border-color: rgba(255,43,74,.35); box-shadow: 0 0 0 4p
   color: var(--text);
   font-weight: 800;
 }
-.row.selected{background: rgba(255,43,74,.10); border-color: rgba(255,43,74,.28)}
+.row.selected{background: rgba(255,43,74,.01); border-color: rgba(255,43,74,.28)}
 .item-name{font-weight:700}
 .badge{
   display:inline-flex; align-items:center;
