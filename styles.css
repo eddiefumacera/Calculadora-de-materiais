@@ -16,8 +16,8 @@ html,body{height:100%}
 body{
   margin:0; color:var(--text); font-family:var(--sans);
   background:
-    radial-gradient(1200px 700px at 15% 0%, rgba(181,0,24,.35), transparent 55%),
-    radial-gradient(900px 600px at 85% 0%, rgba(255,43,74,.12), transparent 55%),
+    radial-gradient(1200px 700px at 15% 0%, rgba(181,0,24,.35), transparent 25%),
+    radial-gradient(900px 600px at 85% 0%, rgba(255,43,74,.12), transparent 25%),
     linear-gradient(180deg, var(--bg0), var(--bg1));
   overflow-x:hidden;
 }
