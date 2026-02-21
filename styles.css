@@ -30,7 +30,7 @@ body{
   background-repeat:no-repeat,no-repeat;
   background-position:center center, center center;
   background-size: 100% 100%, 980px;
-  opacity:.08;
+  opacity:.04;
   filter: saturate(.95) contrast(1.10);
 }
 .bg::after{
